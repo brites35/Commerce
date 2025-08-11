@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Categories</h2>
+
+    {% if not categories %}
+        <p>No categories available.</p>
+    {% else %}
+        <ul style="list-style-type: disc; margin-left: 30px;">
+            {% for category in categories %}
+                <li>
+                    <a  style="display: inline-block; margin-top: 30px; font-size: 24px;" href="{% url 'category_auctions' category %}">{{ category }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

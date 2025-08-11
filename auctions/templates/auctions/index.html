@@ -1,7 +1,32 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>Active Listings {% if category %} of <strong>{{ category }} {% endif %}</strong></h2>
 
-    TODO
+    <div>
+    {% if not open_auctions %}
+        <p>No active listings available.</p>
+    {% else %}
+        <ul class="list-group">
+        {% for auction in auctions %}
+            {% if auction.closed == False %}
+                <li class="list-group-item" style="display: flex; align-items: flex-start;">
+                    {% if auction.image_url %}
+                        <img src="{{ auction.image_url }}" alt="{{ auction.title }}" style="margin-left: 15px; width: 400px; height: 250px; object-fit: contain; background-color: #ffffff; margin-right: 120px;">
+                    {% else %}
+                        <p style="margin-left: 15px; width: 400px; height: 250px; object-fit: contain; background-color: #ffffff; margin-right: 120px;"></p>
+                    {% endif %}
+                    <div>
+                        <p></p>
+                        <a href="{% url 'Auction' auction.id %}" style="font-size: 25px;"><strong>{{ auction.title }}</strong></a>
+                        <p style="max-width: 700px;">{{ auction.description }}</p>
+                        <p><strong>Price: {{ auction.current_bid }}€</strong></p>
+                        <p style="margin-top: 12px; font-size: 10px; color: #888;">Created {{ auction.created_at }}</p>
+                    </div>
+                </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+    </div>
 {% endblock %}

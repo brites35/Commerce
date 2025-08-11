@@ -1,0 +1,93 @@
+{%extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <div style="display: flex; display: flex; align-items: flex-start">
+        <h2>Listing: {{ auction.title }}</h2>
+        {% if user.is_authenticated %}
+            {% if auction in user.watch_list.all %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="remove_watchlist" value="true">
+                    <label style="font-size: 12px; margin: 10px; background-color: #6c757d; font-weight: bold; color: white; padding: 4px; border-radius: 8px;">Watchlist</label>
+                    <button type="submit" style="all: unset; color: orange; font-size: 18px; margin: 10px; cursor: pointer;">- remove from watchlist</button>
+                </form>
+            {% else %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="add_watchlist" value="true">
+                    <button type="submit" style="all: unset; color: orange; font-size: 18px; margin: 12px; cursor: pointer;">+ add to watchlist</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="auction-detail" style="display: flex; align-items: flex-start; margin-top: 40px;">
+        {% if auction.image_url %}
+            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" style="width: 650px; height: 400px; object-fit: contain; background-color: #ffffff; margin-right: 75px;">
+        {% else %}
+            <p style="margin-left: 15px; width: 650px; height: 400px; object-fit: contain; background-color: #ffffff; margin-right: 75px;"></p>
+        {% endif %}
+        <div>
+            <p style="font-size: 18px; max-width: 600px;">{{ auction.description }}</p>
+            <h3 style="font-size: 28px;">Details:</h3>
+            <ul>
+                <li style="font-size: 16px;">Listed by: {{ auction.creator.username }}</li>
+                <li style="font-size: 16px;">Category: {% if auction.category %}{{ auction.category }}{% else %}No Category Listed{% endif %}</li>
+            </ul>
+            <p style="margin-top: 12px; font-size: 10px; color: #888;">Created on: {{ auction.created_at }}</p>
+            <p style="font-size: 35px;"><strong> {{ auction.current_bid }}€</strong></p>
+
+            {% if user.is_authenticated %}
+                {% if not auction.closed %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label style="font-size: 20px;" for="bid_amount"><strong>Place a bid:</strong></label><br>
+                            <label style="font-size: 12px;">{{ auction.bids.count }} bid(s) placed so far. {% if auction.highest_bidder == user %}You are the highest bidder!{% endif %}</label>
+                            <input style="width: 300px;" type="number" id="bid_amount" name="bid_amount" class="form-control" step="0.01" required>
+                            <label style="color: red;">{% if message %}{{ message }}{% endif %}</label>
+                        </div>
+                        <input class="btn btn-primary" type="submit" value="Place Bid">
+                    </form>
+                {% else %}
+                    {% if auction.highest_bidder == user %}
+                        <p style="color: green; font-size: 25px;">You won this auction.</p>
+                    {% else %}
+                        <p style="color: red; font-size: 25px;">This auction has ended.</p>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <p style="color: red; font-size: 25px;">You must log in to place a bid.</p>
+            {% endif %}
+            {% if request.user == auction.creator and not auction.closed %}
+            <div style="margin-top: 20px;">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="close_auction" value="true">
+                    <button type="submit" class="btn btn-danger">Close Auction</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        <div style="margin-left: 75px;">
+            <h3>Comments</h3>
+            {% for comment in comments %}
+                <p style="font-size: 14px; max-width: 400px; margin: 15px 0 2px 0; background-color: #a9aaaa; padding: 6px; border-radius: 8px;"><strong>{{ comment.owner }}</strong>: {{ comment.content }}</p>
+                <label style="font-size: 11px; display: block; margin-top: -4px; margin-left: 4px;">{{ comment.date }}</label>
+            {% endfor %}
+        </div>
+    </div>
+    {% if user.is_authenticated %}
+        {% if not auction.closed %}
+            <div style="margin-top: 20px">
+                <form method="post">
+                    {% csrf_token %}
+                    <textarea style="margin-bottom: 10px; width: 1100px;" id="comment" name="comment" class="form-control" rows= "2" required></textarea>
+                    <input class="btn btn-primary" type="submit" value="Comment"> 
+                </form>
+            </div>
+        {% endif %}
+    {% endif %}
+
+
+{% endblock %}
